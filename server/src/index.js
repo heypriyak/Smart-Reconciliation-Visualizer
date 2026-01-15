@@ -65,7 +65,10 @@ app.use("/api/reconcile", reconcileRouter);
 /**
  * Serve frontend for all other routes (SPA fallback)
  */
-app.get(/^(?!\/api\/).*/, (req, res) => {
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    return next();
+  }
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
