@@ -1,0 +1,10 @@
+modules = ["nodejs-20"]
+run = "cd server && npm start"
+
+[deployment]
+build = ["sh", "-c", "cd client && npm install && npm run build && cd ../server && npm install"]
+run = ["sh", "-c", "cd server && npm start"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

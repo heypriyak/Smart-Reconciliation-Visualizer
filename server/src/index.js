@@ -1,9 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const path = require("path");
 const { connectDb } = require("./db");
 
-dotenv.config({ path: process.env.ENV_FILE || "env.example" });
+dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
 const datasetsRouter = require("./routes/datasets");
 const reconcileRouter = require("./routes/reconcile");
@@ -18,9 +19,18 @@ app.use(
 );
 app.use(express.json({ limit: "2mb" }));
 
+// Serve static files from the client build directory
+const clientDistPath = path.join(__dirname, "../../client/dist");
+app.use(express.static(clientDistPath));
+
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 app.use("/api/datasets", datasetsRouter);
 app.use("/api/reconcile", reconcileRouter);
+
+// Serve frontend for all non-API routes (SPA fallback)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(clientDistPath, "index.html"));
+});
 
 // Basic error handler
 app.use((err, req, res, next) => {
