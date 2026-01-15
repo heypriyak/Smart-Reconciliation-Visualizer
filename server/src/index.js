@@ -48,9 +48,9 @@ app.use("/api/datasets", datasetsRouter);
 app.use("/api/reconcile", reconcileRouter);
 
 /**
- * SPA fallback - catch all non-API routes
+ * Serve frontend for all other routes (SPA fallback)
  */
-app.get("*", (req, res) => {
+app.get(/^(?!\/api\/).*/, (req, res) => {
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
