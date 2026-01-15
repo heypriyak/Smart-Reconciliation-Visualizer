@@ -11,28 +11,53 @@ const reconcileRouter = require("./routes/reconcile");
 
 const app = express();
 
+/**
+ * CORS
+ * - Allow same-origin (Replit preview)
+ * - Also works for local development
+ */
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin: true,
     credentials: false,
   })
 );
+
+/**
+ * Body parsing
+ */
 app.use(express.json({ limit: "2mb" }));
 
-// Serve static files from the client build directory
+/**
+ * Serve frontend static files (Vite build)
+ */
 const clientDistPath = path.join(__dirname, "../../client/dist");
 app.use(express.static(clientDistPath));
 
-app.get("/api/health", (req, res) => res.json({ ok: true }));
+/**
+ * Health check
+ */
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true });
+});
+
+/**
+ * API routes
+ */
 app.use("/api/datasets", datasetsRouter);
 app.use("/api/reconcile", reconcileRouter);
 
-// Serve frontend for all non-API routes (SPA fallback)
-app.get("*", (req, res) => {
+/**
+ * SPA fallback (FIXED for Node 20)
+ * NOTE: Use "/*" instead of "*"
+ */
+app.get("/*", (req, res) => {
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
-// Basic error handler
+/**
+ * Global error handler
+ */
 app.use((err, req, res, next) => {
   const status = err.status || 500;
   res.status(status).json({
@@ -41,20 +66,25 @@ app.use((err, req, res, next) => {
   });
 });
 
+/**
+ * App bootstrap
+ */
 async function main() {
   const port = Number(process.env.PORT || 5000);
   const mongoUri = process.env.MONGODB_URI;
-  if (!mongoUri) throw new Error("Missing MONGODB_URI in env.example");
+
+  if (!mongoUri) {
+    throw new Error("Missing MONGODB_URI in environment variables");
+  }
+
   await connectDb(mongoUri);
+
   app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`API listening on http://localhost:${port}`);
+    console.log(`🚀 Server running on port ${port}`);
   });
 }
 
-main().catch((e) => {
-  // eslint-disable-next-line no-console
-  console.error(e);
+main().catch((err) => {
+  console.error(err);
   process.exit(1);
 });
-
