@@ -3,7 +3,7 @@ import DatasetUpload from './components/DatasetUpload'
 import ReconciliationResults from './components/ReconciliationResults'
 import './index.css'
 
-const API_BASE = 'http://localhost:5000/api'
+const API_BASE = '/api'
 
 export interface ReconciliationSummary {
   reconciliationId: string

@@ -16,9 +16,24 @@ const app = express();
  * - Allow same-origin (Replit preview)
  * - Also works for local development
  */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5000",
+  process.env.CLIENT_ORIGIN,
+  /\.replit\.dev$/,
+];
+
 app.use(
   cors({
-    origin: true,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.some(o => 
+        typeof o === 'string' ? o === origin : o.test?.(origin)
+      )) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow all for dev
+      }
+    },
     credentials: false,
   })
 );
